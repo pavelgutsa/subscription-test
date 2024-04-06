@@ -1,5 +1,4 @@
 
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
@@ -88,7 +87,7 @@ class Challenge {
 	// TODO: We are not handling the case of partial month billing, when we are
 	/// calling this procedure in the middle of the current month,
 	// in this case we are returning the PROJECTED full charge for this month
-	public static int monthlyCharge(String date, Subscription subscription, User[] users) throws ParseException {
+	public static int monthlyCharge(String date, Subscription subscription, User[] users) {
 
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
 		YearMonth billingYearMonth = YearMonth.parse(date, formatter);
@@ -98,39 +97,35 @@ class Challenge {
 		int totalDaysPerCustomer = 0;
 		for (User user : users) {
 
-			// If user subscription is still active
-			if (user.deactivatedOn == null) {
-
-				if (user.activatedOn.isAfter(billingYearMonth.atEndOfMonth())) {
-					// If user subscription started after the end of the month, no charge for this
-					// month
-					continue;
-				} else if (user.activatedOn.isBefore(billingYearMonth.atDay(1))) {
+			if (user.activatedOn.isAfter(billingYearMonth.atEndOfMonth())) {
+				// If user subscription started after the end of the month, no charge for this
+				// month
+				continue;
+			} else if (user.deactivatedOn != null && user.deactivatedOn.isBefore(billingYearMonth.atDay(1))) {
+				// Subscription deactivated before the billing month, no charge
+				continue; 
+			} else if (user.deactivatedOn == null || user.deactivatedOn.isAfter(billingYearMonth.atEndOfMonth())) {
+				// If user subscription is still active
+				
+				if (user.activatedOn.isBefore(billingYearMonth.atDay(1))) {
 					// If user subscription started before this month, charge for the full month
 					totalDaysPerCustomer += billingYearMonth.lengthOfMonth();
-				} else { 
+				} else {
 					// Otherwise the subscription started sometime this month and we charge for the
-					// partial month from that date till the end of the month
+					// partial month from that date till the end of the month including the activation day
 					totalDaysPerCustomer += billingYearMonth.lengthOfMonth() - user.activatedOn.getDayOfMonth() + 1;
 				}
-			} else if (user.deactivatedOn.isBefore(billingYearMonth.atDay(1))) {
-				// Subscription deactivated before the billing month, no charge
-				continue;
-			} else if (user.activatedOn.isAfter(billingYearMonth.atEndOfMonth())) {
-				// User subscription started after this billing month, no charge
-				continue;
-			} else if (user.deactivatedOn.isAfter(billingYearMonth.atEndOfMonth())) {
-				// Subscription ended after this billing month, we charge for the full month
-				totalDaysPerCustomer += billingYearMonth.lengthOfMonth();
 			} else {
-				// Subscription deactivated sometime this month and we charge for the partial
-				// month from the start of the month till the deactivation date
+				// Subscription deactivated sometime this month 
+
 				if (user.activatedOn.isBefore(billingYearMonth.atDay(1))) {
-					// If user subscription started before this month
+					// If user subscription started before this month and we charge for the partial
+					// month from the start of the month till the deactivation date
 					totalDaysPerCustomer += user.deactivatedOn.getDayOfMonth();
 				} else {
-					// User subscription started and ended this month
-					totalDaysPerCustomer += user.deactivatedOn.getDayOfMonth() - user.activatedOn.getDayOfMonth() + 1;
+					// User subscription started and ended this month and we charge for the partial
+					// month including activation and deactivation days
+					totalDaysPerCustomer += user.deactivatedOn.getDayOfMonth() - user.activatedOn.getDayOfMonth() + 2;
 				}
 			}
 		}
