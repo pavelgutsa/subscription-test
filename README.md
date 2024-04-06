@@ -1,9 +1,16 @@
-Prorating Subscriptions
+<h1>Prorating Subscriptions</h1>
 
-Background
+<h2>Instructions</h2>
+To compile and run unit tests execute
+<code>
+<br/>mvn compile
+<br/>mvn package
+</code>
+
+<h2>Background</h2>
 Our company has started selling to larger customers, so we are creating subscription tiers with different feature sets to cater to our customers’ unique needs. We previously charged every customer a flat fee per month, but now we plan on charging for the number of users active on the customer's subscription plan. As a result, we're changing our billing system.
 
-Instructions
+<h2>Instructions</h2>
 You’ve picked up the work item to implement the logic to compute the monthly charge:
 
 Prorating Subscriptions (#8675309)
@@ -25,6 +32,6 @@ Return the running total for the month at the end
 Testing
 The provided unit tests only cover a few cases that one of your colleagues shared, so you should plan to add your own tests to ensure that your solution handles any edge cases.
 
-Notes
+<h2>Notes</h2>
 It’s more important for the return value to be correct than it is for the algorithm to be highly optimized.
 You should not change function names or return types of the provided functions since our test cases depend on those not changing.
